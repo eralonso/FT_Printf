@@ -1,0 +1,539 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    apuntes_ft_printf.txt                              :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: eralonso <eralonso@student.42barcel>       +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/10/15 09:25:38 by eralonso          #+#    #+#              #
+#    Updated: 2022/11/04 21:56:41 by eralonso         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+Diccionario:
+
+-Apunte:
+
+	-Cuándo se haga referencia a una palabra del diccionario, o una \
+	combinación de estas, se hará entre paréntesis para evitar confusiones.
+
+-Palabras:
+
+	-"AD"	-> Any digits (Puede ser cualquier dígito -> \
+				0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+	-"AA"	-> Any Alpha (Puede ser cualquier carácter alpha-> \
+				a, b, c, d, e, f, g, h, i, j, k, l, m, \
+				n, o, p, q, r, s, t, u, v, w, x, y, z);
+
+	-"-{*}"	-> Se utiliza junto con otra palabra del diccionario \
+				para indicar que a la palabra anterior hay que restarle \
+				los casos que aparezcan entre llaves "{}";
+
+				-Ejemplo:
+					AD-{0,2,5} == Todos los dígitos menos el 0, el 2 y el 5;
+
+	-"+{*}"	-> Se utiliza junto con otra palabra del diccionario \
+				para indicar que a la palabra anterior hay que sumarle \
+				los casos que aparezcan entre llaves "{}";
+
+				-Ejemplo:
+					AD+{a,b,c} == Todos los dígitos más las letras a, b y c;
+
+	-"AMC"	-> Abreviatura de "Ancho Mínimo de Campo";
+
+FLAGS (7):
+
+	-(AMC) (se representa con un número decimal (AD)) -> \
+		En caso de que el tamaño de bytes impresos sea menor al (AMC) \
+		se rellenará la diferencia, entre el (AMC) y los bytes impresos, \
+		con espacios antes de imprimir ;
+
+	-Precision -> '.';
+
+	-Menos (símbolo de sustracción, también llamado DASH) -> '-';
+		ALERTA -> Pueden introducir una cantidad indefinida de menos '-';
+
+	-Cero (Zero) -> '0';
+
+	-Hastag (también llamado HAS o ALMOHADILLA) -> '#';
+
+	-Espacio -> ' ';
+
+	-Más (símbolo de adición) -> '+';
+
+	Combinaciones NO premitadas entre flags:
+
+	-"%-0i"
+	-"%+ i"
+
+FORMATOS (7):
+
+-Apuntes:
+
+	Ya que tanto %d como %i actuan de la misma forma los trataremos \
+	como un único formato.
+
+	Haremos lo mismo con los formatos %x y %X. En caso de que sea \
+	importante especificar si se trata de %x o %X se hará \
+	dicha especificación en la misma descripción o al final de esta.
+
+-1.%c:
+
+	-Con el formato "char" no puedin ir las siguients flags (5):
+
+		-Hástag;
+		-Cero;
+		-Espacio;
+		-Precisión;
+		-Más;
+
+	-Posibles combinaciones de flags (3):
+
+		-1."%-c" -> Esta combinación no hace nada pero hay que tenerla en cuenta\
+			(No hace nada ya que este flag necesita el (AMC) para ser útil\
+			y al no estable un (AMC) lo establece como 0);
+
+		-2."%(AD-{0})c" -> Establece el (AMC) antes de la impresión del parámetro;
+
+		-3."%-(AD)c" -> Establece el (AMC) después del carácter;
+
+-2.%s:
+
+	-Con el formato "string" no pueden ir las siguientes flags (4):
+
+		-Espacio;
+		-Hastag;
+		-Más;
+		-Cero;
+
+	-Posibles combinaciones de flags (7):
+
+		-1."%-s" -> Esta combinación no hace nada pero hay que tenerla en cuenta\
+			(No hace nada ya que este flag necesita el (AMC) para ser útil\
+			y al no estable un (AMC) lo establece como 0);
+
+		-2."%(AD-{0})s" -> Establece el (AMC) antes de la impresión del parámetro. \
+			Este flag actúa solamente si el tamaño de la string és menor al (AMC). \
+			En caso de que el string sea menor al (AMC) el total de la resta entre \
+			el (AMC) y el tamaño del string se implementa como espacios antes de la \
+			impresión del parámetro;
+
+		-3."%.(AD)s" -> Indica la cantidad de carácteres ha imprimir. En caso de que \
+			la precisón asignada sea mayor al tamaño de la string se imprime el total \
+			de la string y no hace nada más;
+
+		-4."%-(AD-{0})s" -> Actúa de la misma forma que el punto 2 con la diferencia \
+			de que en vez de implementar los espacios antes de la impresión del \
+			parámetro se implementan después;
+
+		-5."%-.(AD)s" -> Actúa de la misma forma que el punto 3. No hay ningún \
+			tipo de variación devido a que el flag "Menos" tan solo interactúa \
+			con el flag "(AMC)";
+
+		-6."%(AD-{0}).(AD)s" -> En esta combinación prima el flag "Precisión" sobre \
+			el flag "(AMC)". Lo primero que deberemos tener en cuenta es el valor \
+			especificado por la "Precisión", a partir de ahí nos indicarán cuántos \
+			carácteres del string se deben de imprimir (En caso de que la precisón \
+			sea mayor al tamaño del string se imprimirá SOLO el string completo). \
+			Partiendo de la cantidad de carácteres impresos, le restaremos esa \
+			cantidad al tamaño especificado como (AMC). En caso de que el resultado \
+			sea mayor a 0 imprimiremos esos bytes sobrantes como espacios al inicio \
+			del string;
+
+				-Ejemplos:
+
+					-CODE
+						1.printf("%10.13s\n", "Hola que tal.");
+						2.printf("%10.100s\n", "Hola que tal.");
+						3.printf("%20.13s\n", "Hola que tal.");
+						4.printf("%20.10s\n", "Hola que tal.");
+
+					-OUTPUT
+						1."Hola que tal.$"
+						2."Hola que tal.$"
+						3."       Hola que tal.$" <--|
+													 |	|->	Ambos regresan \
+													 |--|	el mismo número de bytes\
+													 |--|	BYTES = 21;
+													 |	|->	(El byte de más es por el '\n')
+						4."          Hola que t$" <--|
+
+						Comando para probar -> \
+						gcc ${Nombre de tu archivo.c con el printf} && ./a.out | cat -e)
+
+
+		-7."%-(AD-{0}).(AD)s" -> Funciona de la misma forma que el punto 6, pero \
+			en vez de imprimir los espacios antes de imprimir la string \
+			lo hace después;
+
+				NOTA: Este flag puede ser introducido un número ilimitado de veces, pero solo \
+				debe de tenerse en cuenta una vez.
+
+					-Ejemplo:
+						CODE	= printf("%            i\n", 12);
+						OUTPUT	= " 12$"
+
+				-Ejemplos:
+
+					-CODE
+						1.printf("%-20.13s\n", "Hola que tal.");
+						2.printf("%-20.10s\n", "Hola que tal.");
+
+					-OUTPUT
+						1."Hola que tal.       $" <--|
+													 |	|->	Ambos regresan \
+													 |--|	el mismo número de bytes\
+													 |--|	BYTES = 21;
+													 |	|->	(El byte de más es por el '\n')
+						2."Hola que t          $" <--|
+
+-3.%d && %i:
+
+	-NOTAS:
+
+		Para cada vez que se utilize la flag "Espacio", si el número és negativo, no se \
+		imprimirá dicho espacio ya que el lugar que ocuparía el espacio es sustituido por \
+		el símbolo menos '-';
+
+	-Con el formato "int" no pueden ir las siguientes flags (1):
+
+		-Hastag;
+
+	-Posibles combinaciones de flags (28):
+
+							COMBINACIONES DE UNA SOLA FLAG (6)
+
+		-1."%(AD-{0})i" -> Coge el número de dígitos ha imprimir y si es mayor, o igual, \
+			 al (AMC) no hace nada. En caso contrario rellena la diferencia en forma de \
+		 	espacios antes de imprimir el número;
+
+		-2."%.(AD)i" -> Coge el número de dígitos ha imprimir y si es mayor, o igual, \
+			 a la "Precisión" no hace nada. En caso contrario rellena la diferencia \
+			 en forma de ceros antes de imprimir el número. En caso de que el número \
+			 ha imprimir sea negativo, se imprimirá primero el símbolo negativo '-' y \
+			 después los ceros que hagan falta seguido de el número;
+
+			 	-Ejemplo:
+	
+					CODE
+						1.printf("%.3i\n", 12);
+						2.printf("%.3i\n", -12);
+						3.printf("%.5i\n", 12);
+						4.printf("%.5i\n", -12);
+
+					OUTPUT
+						1."012$"
+						2."-012$"
+						3."00012$"
+						4."-00012$"
+	
+		-3."% i" -> Imprime un espacio antes de imprimir el número;
+	
+				NOTA: Este flag puede ser introducido un número ilimitado de veces, pero solo \
+					debe de imprimir un espacio;
+	
+				IMPORTANTE: Si el número ha imprimir és negativo (n < 0), no se imprime el espacio;
+	
+					-Ejemplos:
+	
+						CODE
+							1.printf("%            i\n", 12);
+							2.printf("% i\n", -12);
+	
+						OUTPUT
+							1." 12$"
+							2."-12$"
+	
+		-4."%0i" -> En este caso no hace nada ya que el flag "Cero" és dependiente del (AMC);
+	
+		-5."%-i" -> Al igual que en el punto 4 no funciona sin un (AMC);
+  	 
+		-6."%+i" -> En caso de que el nümero ha imprimr sea positivo, imprime el símbolo '+' \
+			antes de imprimir el número, en cualquier otro caso no hace nada;
+	
+									COMBINACIONES DE 2 FLAGS (14)
+	
+		-1."%(AD-{0}).(AD)i" -> Para entender bien está combinación se puede tomar como si \
+			la ejecutaramos en dos partes, la primera parte és la "Precisión". Haremos lo \
+			especificado en el punto 2 (de el apartado de una sola flag) y tomaremos ese \
+			valor total de bytes ha imprimir para restarle al (AMC) y, en caso de que la \
+			resta sea mayor a 0, se imprimiran la cantidad sobrante del (AMC) como espacios;
+	
+				-Ejemplos:
+	
+					-CODE
+						1.printf("%5.5i\n", 12);
+						2.printf("%1.3i\n", 12);
+						3.printf("%1.3i\n", -12);
+						4.printf("%6.5i\n", 12);
+						5.printf("%6.5i\n", -12);
+						6.printf("%10.5i\n", 12);
+						7.printf("%10.5i\n", -12);
+	
+					-OUTPUT
+						1."00012$"
+						2."012$"
+						3."-012$"
+						4." 00012$"
+						5."-00012$"
+						6."     00012$"
+						7."    -00012$"
+	
+		-2."% (AD-{0})i" -> En esta combinación el espacio siempre se va ha imprimir y \
+			le restará 1 al (AMC) debido ha que este espacio creado por la flag "Espacio" \
+			pasa a formar parte del tamaño del parámetro;
+	
+				-Ejemplos:
+	
+					-CODE
+						1.printf("% 1i\n", 12);
+						2.printf("% 4i\n", 12);
+						3.printf("% 4i\n", -12);
+	
+					-OUTPUT
+						1." 12$"
+						2."  12$"
+						3." -12$"
+	
+		-3."%0(AD-{0})i" -> Actúa de la misma forma que el punto 1 (de el apartado de una sola flag) \
+			pero en vez de imprimir la diferencia de bytes en forma de espacios lo imprime como ceros '0'. \
+			En caso de que el número sea negativo imprime los ceros '0' después del símbolo negativo '-' \
+			y antes del número;
+	
+				-Ejemplos:
+					
+					-CODE
+						1.printf("%05i\n", 12);
+						2.printf("%05i\n", -12);
+						3.printf("%02i\n", 12);
+						4.printf("%02i\n", -12);
+						5.printf("%03i\n", -12);
+						6.printf("%04i\n", -12);
+	
+					-OUTPUT
+						1."00012$"
+						2."-0012$"
+						3."12$"
+						4."-12$"
+						5."-12$"
+						6."-012$"
+	
+		-4."%-(AD-{0})i" -> Actúa de la misma forma que el punto 1 (de el apartado de una sola flag), \
+			pero poniendo los espacios después de imprimir el número;
+	
+			-Ejemplos:
+	
+				-CODE
+					1.printf("%-2i", 12);
+					2.printf("%-2i", -12);
+					3.printf("%-3i", 12);
+					4.printf("%-3i", -12);
+					5.printf("%-4i", -12);
+	
+				-OUTPUT
+					1."12$"
+					2."-12$"
+					3."12 $"
+					4."-12$"
+					5."-12 $"
+	
+		-5."%+(AD-{0})i" -> Actúa de la misma forma que el punto 1 (de el apartado de una sola flag), \
+			solo que si el número es positivo le pone el símbolo más '+' antes de imprimir el número. \
+			Esto consume 1 byte	del (AMC);
+	
+				-Ejemplos:
+					
+					-CODE
+						1.printf("%+1i\n" 12);
+						2.printf("%+1i\n" -12);
+						3.printf("%+3i\n" 12);
+						4.printf("%+3i\n" -12);
+						5.printf("%+5i\n" 12);
+						6.printf("%+5i\n" -12);
+
+					-OUTPUT
+						1."+12$"
+						2."-12$"
+						3."+12$"
+						4."-12$"
+						5."  +12$"
+						6."  -12$"
+	
+		-6."% .(AD)%i" -> Actúa de la misma forma que el punto 2 (de el apartado de una sola flag) \
+			y le agrega un espacio antes de imprimir el número y la precisión;
+
+		-7."%+.(AD)%i" -> Actúa de la misma forma que el punto 2 (de el apartado de una sola flag) \
+			y le agrega un más '+', antes de imprimir el número y la precisión, \
+			si el número ha imprimir és positivo (n > 0);
+
+		-8."%-.(AD)i" -> Actúa de la misma forma que el punto 2 (de el apartado de una sola flag). \
+			Ya que el flag "Menos" es dependiente de un (AMC) no actúa en este caso;
+
+		-9."%0.(AD)i" -> Actúa de la misma forma que el punto 2 (de el apartado de una sola flag). \
+			Ya que el flag "Cero" es dependiente de un (AMC) no actúa en este caso;
+		
+		-10."% 0i" -> Actúa de la misma forma que el punto 3 (de el apartado de una sola flag). \
+			Ya que el flag "Cero" es dependiente de un (AMC) no actúa en este caso;
+
+		-11."%- i" -> Actúa de la misma forma que el punto 3 (de el apartado de una sola flag). \
+			Ya que el flag "Menos" es dependiente de un (AMC) no actúa en este caso;
+		
+		-12."%-+i" -> Actúa de la misma forma que el punto 6 (de el apartado de una sola flag). \
+			El flag "Menos" no hace nada ya que es dependiente de un (AMC);
+
+		-13."%+0i" -> Actúa de la misma forma que el punto 6 (de el apartado de una sola flag). \
+			El flag "Cero" no hace nada ya que es dependiente de un (AMC);
+
+		-14."%-0i" -> Ya que tanto la flag "Menos" como la flag "Cero" son dependientes de un \
+			(AMC) esta combinación no hace nada;
+
+										COMBINACIONES DE 3 FLAGS (4)
+
+		-1."% (AD-{0}).(AD)i" -> Actúa de la misma forma que el punto 1 (de el apartado de 2 flags) \
+			y le agrega un espacio antes de imprimir el número. En caso de que el número sea negativo \
+			no se imprime el espacio;
+
+				-Ejemplos:
+					
+						-CODE
+							1.printf("% 1.1i", 12);
+							2.printf("% 1.1i", -12);
+							3.printf("% 1.3i", 12);
+							4.printf("% 1.3i", -12);
+							5.printf("% 1.6i", 12);
+							6.printf("% 1.6i", -12);
+							7.printf("% 5.4i", 12);
+							8.printf("% 5.4i", -12);
+							9.printf("% 10.4i", 12);
+							10.printf("% 10.4i", -12);
+
+						-OUTPUT
+							1." 12$"
+							2."-12$"
+							3." 012$"
+							4."-012$"
+							5." 000012$"
+							6."-000012$"
+							7." 0012$"
+							8."-0012$"
+							9."      0012$"
+						   10."     -0012$"
+
+		-2."%-(AD-{0}).(AD)i" -> Actúa de la misma forma que el punto 1 (de el apartado de 2 flags), \
+			solo que introduce los espacios del (AMC) después del número.
+
+				-Ejemplos:
+					
+					-CODE
+						1.printf("%-1.1i\n", 12);
+						2.printf("%-1.1i\n" -12);
+						3.printf("%-1.4i\n", 12);
+						4.printf("%-1.4i\n" -12);
+						5.printf("%-5.1i\n", 12);
+						6.printf("%-5.1i\n" -12);
+						7.printf("%-5.4i\n", 12);
+						8.printf("%-5.4i\n" -12);
+
+					-OUTPUT
+						1."12$"
+						2."-12$"
+						3."0012$"
+						4."-0012$"
+						5."12   $"
+						6."-12  $"
+						7."0012 $"
+						8."-0012$"
+
+		-3."%+(AD-{0}.(AD))i" -> Actúa de la misma forma que el punto 1 (de el apartado de 2 flags), \
+			solo que le agrega el símbolo más "+" antes de imprimir el número (Esto solamente ocurre \
+			si el número ha imprimir és positivo);
+
+		-4."%0(AD-{0}).(AD)i" -> Actúa de la misma forma que el punto 1 (de el apartado de 2 flags). \
+			En este caso el flag "Cero" no hace nada;
+
+										COMBINACIONES DE 4 FLAGS (4)
+
+		-1."%+0(AD-{0}).(AD)i" -> Actúa de la misma forma que el punto 3 (de el apartado de 3 flags).
+
+		-2."% 0(AD-{0}).(AD)i" -> Actúa de la misma forma que el punto 1 (de el apartado de 3 flags).
+
+		-3."%- (AD-{0}).(AD)i" -> Actúa de la misma forma que el punto 2 (de el apartado de 3 flags), \
+			solo que imprime un espacio ' ' antes de la impresión del número (en caso de que el número \
+			sea negativo no hace nada)
+
+		-4."%-+(AD-{0}).(AD)i" -> Actúa de la misma forma que el punto 2 (de el apartado de 3 flags), \
+			solo que imprime el símbolo más '+' antes de la impresión del número, SOLAMENTE si el número \
+			ha imprimir és POSITIVO, en caso contrairo no hace nada;
+
+-4.%u
+
+	-Con el formato "unsigned int" NO pueden ir las siguientes flags (3):
+
+		-Hastag
+		-Más -> "No funciona ya que al ser un formato de solo números positivos (n > 0) no tiene sentido";
+		-Espacio
+
+	-Posibles combinaciones de flags (UP2YOU):
+		
+		Ya que todas las combinaciones posibles con este formato interactuan de la misma forma que \
+		con el formato "int" solo hace falta revisar dicho formato para entender el comportamiento de \
+		las flags permitidas por el formato "unsigned int";
+
+-5.%x && %X
+
+	-Con el formato "hexadecimal" NO pueden ir las siguientes flags (2):
+
+		-Más
+		-Espacio
+	
+	-Posibles combinaciones de flags (UP2YOU + 1):
+
+		Con este formato pasa algo parecido como con el formato "unsigned int", ya que todas las \
+		combinaciones de flags están ya definidas en el formato "int", lo único és que en este formato \
+		se puede utilizar la flag "Hastag" (a diferencia que en el formato "int"), lo cuál hace que \
+		haya un pequeño cambio (és muy leve). Lo único que cambia és que ahora debemos contemlplar \
+		la opción de que se agregue la flag "Hastag", la cuál simplemente añade un 0x o 0X dependiendo \
+		de el formato de hexadecimal que se escoja (%#x == 0x, %#X == 0X). Este 0x actúa de la misma forma \
+		que actúa el símbolo negativo '-' en el formato "int".
+
+-6.%p
+
+	-Con el formato "pointer" NO pueden ir las siguientes flags (5):
+
+		-Más
+		-Espacio
+		-Precisión
+		-Cero
+		-Hastag
+
+	-Posibles combinaciones de flags (un poco menos de UP2YOU):
+
+		Las posibles combinaciones de flags para este formato són las mismas que con el formato \
+		"hexadecimal" pero más restringidas;
+
+-7.%%
+
+	-Este caso no és un formato como tal pero si que acepta algunas flags (3):
+
+	-(AMC)
+	-Menos
+	-Cero
+
+	-Las combinaciones (que tienen alguna funcionalidad) posibes són (4):
+
+		-1."%10%" -> Te establece un (AMC) al cúal le restamos 1 (ese uno es porque solo vamos ha \
+			imprimir 1 byte, el porcentaje '%') y le imprimimos el número final de la resta en forma de \
+			espacios ' ' antes de imprimir el porcentaje '%';
+
+		-2."%010%" -> Te establece un (AMC) al cúal le restamos 1 (ese uno es porque solo vamos ha \
+			imprimir 1 byte, el porcentaje '%') y le imprimimos el número final de la resta en forma de \
+			ceros '0' antes de imprimir el porcentaje '%';
+
+		-3."%-10%" -> Hace lo mismo que el punto 1, solo que los espacios ' ' los imprime después de imprimir \
+			el porcentaje '%';
+
+		-4."%-10%" -> Hace lo mismo que el punto 2, solo que los ceros '0' los imprime después de imprimir \
+			el porcentaje '%';
+
+Y SANSEACABÓ
